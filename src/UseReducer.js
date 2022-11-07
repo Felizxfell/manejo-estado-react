@@ -5,6 +5,30 @@ const SECURITY_CODE = "paradigma";
 function UseReducer({ name }) {
     const [state, dispatch] = React.useReducer(reducer, initialState)
 
+    const onConfirm = () => {
+        dispatch({ type: actionTypes.CONFIRM })
+    }
+
+    const onError = () => {
+        dispatch({ type: actionTypes.ERROR })
+    }
+
+    const onWrite = ({ target: { value } }) => {
+        dispatch({ type: actionTypes.WRITE, payload: value })
+    }
+
+    const onCheck = () => {
+        dispatch({ type: actionTypes.CHECK })
+    }
+
+    const onDelete = () => {
+        dispatch({ type: actionTypes.DELETE })
+    }
+
+    const onReset = () => {
+        dispatch({ type: actionTypes.RESET })
+    }
+
     React.useEffect(() => {
         console.log("Empezando el efecto");
 
@@ -13,9 +37,9 @@ function UseReducer({ name }) {
                 console.log("Haciendo la validación");
 
                 if (state.value === SECURITY_CODE) {
-                    dispatch({ type: 'CONFIRM' })
+                    onConfirm()
                 } else {
-                    dispatch({ type: 'ERROR' })
+                    onError()
                 }
 
                 console.log("Terminando la validación");
@@ -41,26 +65,24 @@ function UseReducer({ name }) {
                 <input
                     placeholder='Código de seguridad'
                     value={state.value}
-                    onChange={(event) => 
-                        dispatch({ type: 'WRITE', payload: event.target.value })                        
-                    }
+                    onChange={onWrite}
                 />
-                <button onClick={() => dispatch({ type: 'CHECK' }}>Comprar</button>
+                <button onClick={onCheck}>Comprar</button>
             </div>
         )
     } else if (!!state.confirmed && !state.deleted) {
         return (
             <>
                 <p>¿Seguro que desea borrar el useState?</p>
-                <button onClick={() => dispatch({ type: 'DELETE' })}>Sí, eliminar</button>
-                <button onClick={() => dispatch({ type: 'RESET' }}>No, volver</button>
+                <button onClick={onDelete}>Sí, eliminar</button>
+                <button onClick={onReset}>No, volver</button>
             </>
         )
     } else {
         return (
             <>
                 <p>Eliminado con exito</p>
-                <button onClick={() => dispatch({ type: 'RESET' })}>Volver</button>
+                <button onClick={onReset}>Volver</button>
             </>
         )
     }
@@ -74,31 +96,40 @@ const initialState = {
     confirmed: false
 }
 
+const actionTypes = {
+    CONFIRM: 'CONFIRM',
+    WRITE: 'WRITE',
+    ERROR: 'ERROR',
+    CHECK: 'CHECK',
+    DELETE: 'DELETE',
+    RESET: 'RESET',
+}
+
 const reducerOBJECT = (state, payload) => ({
-    'CONFIRM': {
+    [actionTypes.CONFIRM]: {
         ...state,
         error: false,
         loading: false,
         confirmed: true,
     },
-    'WRITE': {
+    [actionTypes.WRITE]: {
         ...state,
         value: payload,
     },
-    'ERROR': {
+    [actionTypes.ERROR]: {
         ...state,
         error: true,
         loading: false,
     },
-    'CHECK': {
+    [actionTypes.CHECK]: {
         ...state,
         loading: true
     },
-    'DELETE': {
+    [actionTypes.DELETE]: {
         ...state,
         deleted: true,
     },
-    'RESET': {
+    [actionTypes.RESET]: {
         ...state,
         confirmed: false,
         deleted: false,
@@ -107,13 +138,12 @@ const reducerOBJECT = (state, payload) => ({
 })
 
 const reducer = (state, action) => {
-    if (reducerOBJECT(state)[action.type]) {
-        return reducerOBJECT(state, action.payload)[action.type];
-    } else {
-        return {
-            ...state,
-        }
-    }
+    // if (reducerOBJECT(state)[action.type]) {
+    //     return reducerOBJECT(state, action.payload)[action.type];
+    // } else {
+    //     return state
+    // }
+    return reducerOBJECT(state, action.payload)?.[action.type] ?? state;
 }
 
 export { UseReducer };
